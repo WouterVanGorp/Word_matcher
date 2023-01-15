@@ -1,4 +1,4 @@
-import { processedList, wordOption, wordSegments } from "./models/types";
+import { ProcessedList, WordOption, WordSegments } from "./types/types";
 
 // This will change to the actual list
 const words = [
@@ -17,14 +17,14 @@ const words = [
 const MAX_WORD_LENGTH = 6;
 const MAX_WORD_SEGMENTS = 3;
 
-export const printLine = (wordOption: wordOption): string =>
+export const printLine = (wordOption: WordOption): string =>
   wordOption.components.join("+") + "=" + wordOption.result;
 
 function splitListOnMaxLength(
   wordList: string[],
   maxWordLength: number
-): processedList {
-  const result: processedList = { wordResults: [] };
+): ProcessedList {
+  const result: ProcessedList = { wordResults: [] };
 
   return wordList.reduce((acc, val) => {
     const wordLenght = val.length;
@@ -70,19 +70,26 @@ function buildAllSubsets(
 }
 
 function buildAllWordOptions(
-  wordSegments: wordSegments,
-  segmentCombinations: number[][]
-): string[][] {
-  const options: string[][] = [];
+  wordSegments: WordSegments,
+  segmentNumberCombinations: number[][]
+): WordOption[] {
+  const segmentWordCombinations = buildWordOptionsForAllSegments(wordSegments, segmentNumberCombinations);
+  return buildAllCombinations(segmentWordCombinations);
+}
+function buildWordOptionsForAllSegments(
+    wordSegments: WordSegments,
+    segmentCombinations: number[][]
+  ): string[][] {
+    const options: string[][] = [];
   segmentCombinations.forEach((segmentCombination) =>
     options.push(
       ...buildWordOptionsForSegment(wordSegments, segmentCombination)
     )
   );
   return options;
-}
+  }
 function buildWordOptionsForSegment(
-  wordSegments: wordSegments,
+  wordSegments: WordSegments,
   segmentCombination: number[]
 ): string[][] {
   const wordCombinations = segmentCombination.map(
@@ -90,6 +97,11 @@ function buildWordOptionsForSegment(
   );
   return combineAllArrays(wordCombinations);
 }
+function buildAllCombinations(segmentWordCombinations: string[][]): WordOption[] {
+    const result: WordOption[] = [];
+    segmentWordCombinations.forEach(wordSegment => {})
+    return result
+  }
 
 function combineAllArrays(arrays: string[][]): string[][] {
   let result: string[][] = combineTwoArrays(arrays[0], arrays[1]);
@@ -107,10 +119,6 @@ function combineListWithArray(list: string[][], arr2: string[]): string[][] {
   var result: string[][] = [];
   list.forEach((l) => arr2.forEach((word2) => result.push([...l, word2])));
   return result;
-}
-
-function buildAllCombinations(test: string[][]) {
-  test.forEach((list) => {});
 }
 
 function main() {
