@@ -21,3 +21,17 @@ Treat this exercise as if you were writing production code; think unit tests, SO
 The solution must be stored in a git repo. After the repo is cloned, the application should be able to run with one command / script.
 
 Don't spend too much time on this.
+
+# How To run
+
+To run this application you first have to run
+
+<code>
+npm install
+</code>
+
+after that you can run following command to start the application
+
+<code>
+npm start
+</code>
