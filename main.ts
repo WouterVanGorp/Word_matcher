@@ -1,4 +1,4 @@
-import {processedList, wordOption, wordSegments} from './models/types';
+import { processedList, wordOption, wordSegments } from "./models/types";
 
 // This will change to the actual list
 const words = [
@@ -17,8 +17,7 @@ const words = [
 const MAX_WORD_LENGTH = 6;
 const MAX_WORD_SEGMENTS = 3;
 
-
-const printLine = (wordOption: wordOption): string =>
+export const printLine = (wordOption: wordOption): string =>
   wordOption.components.join("+") + "=" + wordOption.result;
 
 function splitListOnMaxLength(
@@ -30,8 +29,7 @@ function splitListOnMaxLength(
   return wordList.reduce((acc, val) => {
     const wordLenght = val.length;
     if (wordLenght === maxWordLength) acc.wordResults.push(val);
-    else if (wordLenght > maxWordLength)
-      return acc; // als er een te lang woord zou tussen zitten
+    else if (wordLenght > maxWordLength) return acc;
     else
       result[wordLenght]
         ? result[wordLenght].push(val)
@@ -41,11 +39,11 @@ function splitListOnMaxLength(
 }
 
 function buildAllSegmentCombinations(target: number, maxWordSegment: number) {
-    const subsets: number[][] = [];
-    const nums = [...Array(target).keys()].slice(1);
-    buildAllSubsets(nums, target, 0, [], subsets, maxWordSegment);
-    return subsets;
-  }
+  const subsets: number[][] = [];
+  const nums = [...Array(target).keys()].slice(1);
+  buildAllSubsets(nums, target, 0, [], subsets, maxWordSegment);
+  return subsets;
+}
 function buildAllSubsets(
   nums: number[],
   target: number,
@@ -94,13 +92,13 @@ function buildWordOptionsForSegment(
 }
 
 function combineAllArrays(arrays: string[][]): string[][] {
-  let result: string[][] = combineArrays(arrays[0], arrays[1]);
+  let result: string[][] = combineTwoArrays(arrays[0], arrays[1]);
   for (let i = 2; i < arrays.length; i++) {
     result = combineListWithArray(result, arrays[i]);
   }
   return result;
 }
-function combineArrays(arr1: string[], arr2: string[]): string[][] {
+function combineTwoArrays(arr1: string[], arr2: string[]): string[][] {
   var result: string[][] = [];
   arr1.forEach((word1) => arr2.forEach((word2) => result.push([word1, word2])));
   return result;
@@ -116,7 +114,7 @@ function buildAllCombinations(test: string[][]) {
 }
 
 function main() {
-    // first read in the input file
+  // first read in the input file
 
   const processedList = splitListOnMaxLength(words, MAX_WORD_LENGTH);
   const possibleResults = processedList.wordResults;
