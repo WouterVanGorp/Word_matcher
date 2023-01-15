@@ -1,15 +1,16 @@
 const words = ['test', 'ge', 'adgf', 'test20', '20', 'ad', 'adgfad', '20test', '2'];
 const MAX_WORD_LENGTH = 6;
-const MAX_WORD_SEGMENTS = 2;
+const MAX_WORD_SEGMENTS = 3;
 
 type wordSegments = { [n: number]: string[] }
 type processedList = {
-    wordResults: string[],
-    [n: number]: string[]
-}
+    wordResults: string[]   
+} & wordSegments
 type wordOption = { result: string, components: string[] }
 
-const splitListOnMaxLength = (wordList: string[], maxWordLength: number): processedList => {
+const printLine = (wordOption: wordOption): string => wordOption.components.join('+') + '=' + wordOption.result;
+
+function splitListOnMaxLength (wordList: string[], maxWordLength: number): processedList {
     const result: processedList = { wordResults: [] };
 
     return wordList.reduce((acc, val) => {
@@ -21,22 +22,71 @@ const splitListOnMaxLength = (wordList: string[], maxWordLength: number): proces
     }, result)
 }
 
-const createPrintLine = (wordOption: wordOption): string => wordOption.components.join('+') + '=' + wordOption.result;
-const checkIfWordExistInResultList = (word: string, wordResults: string[]): boolean => wordResults.includes(word)
-const checkIfWordOptionsExistInResultList = (wordOptions: string[], wordResults: string[]): string[] => wordOptions.filter(word => wordResults.includes(word))
+const buildAllSubsets = (nums: number[], target: number, start: number, subset: number[], subsets: number[][], maxSize: number) => {
+    if (target === 0) {
+        subsets.push(subset.slice());
+        return;
+    }
 
-const buildAllWordOptions = (wordSegments: wordSegments, maxAllowedSegements: number): wordOption[] => {
-    const options: wordOption[] = [];
-    // do some magic
+    if (subset.length === maxSize) return;
+
+    for (let i = start; i < nums.length; i++) {
+        if (nums[i] > target) {
+            continue;
+        }
+        subset.push(nums[i]);
+        buildAllSubsets(nums, target - nums[i], i, subset, subsets, maxSize);
+        subset.pop();
+    }
+}
+const buildAllSegmentCombinations = (target: number, maxWordSegment: number) => {
+    const subsets: number[][] = [];
+    const nums = [...Array(target).keys()].slice(1);
+    buildAllSubsets(nums, target, 0, [], subsets, maxWordSegment);
+    return subsets;
+}
+
+const buildAllWordOptions = (wordSegments: wordSegments, segmentCombinations: number[][]): string[][] => {
+    const options: string[][] = [];
+    segmentCombinations.forEach(segmentCombination => options.push(...buildWordOptionsForSegment(wordSegments, segmentCombination)));
     return options
+}
+const buildWordOptionsForSegment = (wordSegments: wordSegments, segmentCombination: number[]): string[][] => {
+    const wordCombinations = segmentCombination.map(sc => wordSegments[sc] ?? []);
+    return combineAllArrays(wordCombinations)
+}
+function combineAllArrays(arrays: string[][]): string[][] {
+    let result: string[][] = combineArrays(arrays[0], arrays[1])
+    for(let i = 2; i < arrays.length; i++) {
+        result = combineListWithArray(result, arrays[i]);
+    }
+    return result;
+}
+function combineArrays(arr1: string[], arr2: string[]): string[][] {
+    var result: string[][] = []
+    arr1.forEach(word1 => arr2.forEach(word2 => result.push([word1, word2])))
+    return result;
+}
+function combineListWithArray(list: string[][], arr2: string[]): string[][] {
+    var result: string[][] = []
+    list.forEach(l => arr2.forEach(word2 => result.push([...l, word2])))
+    return result;
+}
+
+function buildAllCombinations(test: string[][]) {
+    test.forEach(list => {
+        
+    })
 }
 
 const main = () => {
     const processedList = splitListOnMaxLength(words, MAX_WORD_LENGTH);
     const possibleResults = processedList.wordResults;
-    const allOptions = buildAllWordOptions(processedList, MAX_WORD_SEGMENTS);
 
-    const outcome = allOptions
-        .filter(option => possibleResults.includes(option.result))
-        .map(result => createPrintLine(result));
+    const allSegmentCombinations = buildAllSegmentCombinations(MAX_WORD_LENGTH, MAX_WORD_SEGMENTS);
+    const allOptions = buildAllWordOptions(processedList, allSegmentCombinations);
+
+    console.log(allOptions);
 }
+
+main()
