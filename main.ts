@@ -38,10 +38,10 @@ function splitListOnMaxLength(
   }, result);
 }
 
-function buildAllSegmentCombinations(target: number, maxWordSegment: number) {
+function buildAllSegmentCombinations(maxWordLength: number, maxWordSegment: number) {
   const subsets: number[][] = [];
-  const nums = [...Array(target).keys()].slice(1);
-  buildAllSubsets(nums, target, 0, [], subsets, maxWordSegment);
+  const nums = [...Array(maxWordLength).keys()].slice(1);
+  buildAllSubsets(nums, maxWordLength, 0, [], subsets, maxWordSegment);
   return subsets;
 }
 function buildAllSubsets(
@@ -73,21 +73,24 @@ function buildAllWordOptions(
   wordSegments: WordSegments,
   segmentNumberCombinations: number[][]
 ): WordOption[] {
-  const segmentWordCombinations = buildWordOptionsForAllSegments(wordSegments, segmentNumberCombinations);
+  const segmentWordCombinations = buildWordOptionsForAllSegments(
+    wordSegments,
+    segmentNumberCombinations
+  );
   return buildAllCombinations(segmentWordCombinations);
 }
 function buildWordOptionsForAllSegments(
-    wordSegments: WordSegments,
-    segmentCombinations: number[][]
-  ): string[][] {
-    const options: string[][] = [];
+  wordSegments: WordSegments,
+  segmentCombinations: number[][]
+): string[][] {
+  const options: string[][] = [];
   segmentCombinations.forEach((segmentCombination) =>
     options.push(
       ...buildWordOptionsForSegment(wordSegments, segmentCombination)
     )
   );
   return options;
-  }
+}
 function buildWordOptionsForSegment(
   wordSegments: WordSegments,
   segmentCombination: number[]
@@ -97,11 +100,13 @@ function buildWordOptionsForSegment(
   );
   return combineAllArrays(wordCombinations);
 }
-function buildAllCombinations(segmentWordCombinations: string[][]): WordOption[] {
-    const result: WordOption[] = [];
-    segmentWordCombinations.forEach(wordSegment => {})
-    return result
-  }
+function buildAllCombinations(
+  segmentWordCombinations: string[][]
+): WordOption[] {
+  const result: WordOption[] = [];
+  segmentWordCombinations.forEach((wordSegment) => {});
+  return result;
+}
 
 function combineAllArrays(arrays: string[][]): string[][] {
   let result: string[][] = combineTwoArrays(arrays[0], arrays[1]);
