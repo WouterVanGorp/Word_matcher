@@ -112,7 +112,7 @@ function buildAllCombinations(
   segmentWordCombinations: string[][]
 ): WordOption[] {
   const result: WordOption[] = [];
-  segmentWordCombinations.forEach((wordSegment) => {});
+  // do some magic here to create all words
   return result;
 }
 
