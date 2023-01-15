@@ -1,24 +1,29 @@
+import * as fs from "fs";
 import { ProcessedList, WordOption, WordSegments } from "./types/types";
-
-// This will change to the actual list
-const words = [
-  "test",
-  "ge",
-  "adgf",
-  "test20",
-  "20",
-  "ad",
-  "adgfad",
-  "20test",
-  "2",
-];
 
 // This wil be moved to a config file
 const MAX_WORD_LENGTH = 6;
-const MAX_WORD_SEGMENTS = 3;
+const MAX_WORD_SEGMENTS = 2;
+const INPUT_FILE_NAME = "input.txt";
+const OUTPUT_FILE_NAME = "output.txt";
+const WORD_SEPERATION = "\r\n"
 
 export const printLine = (wordOption: WordOption): string =>
   wordOption.components.join("+") + "=" + wordOption.result;
+
+async function processFile(fileName: string, seperation: string): Promise<string[]> {
+  const file = await fs.promises.readFile(fileName, "utf-8");
+  return file.split(seperation);
+}
+async function writeToFile(results: WordOption[], fileName: string, seperation: string) {
+  try {
+     const output = results.map(r => printLine(r)).join(seperation)
+    await fs.promises.writeFile(fileName, output);
+    console.log("The file has been saved!");
+  } catch (err) {
+    console.error(err);
+  }
+}
 
 function splitListOnMaxLength(
   wordList: string[],
@@ -38,7 +43,10 @@ function splitListOnMaxLength(
   }, result);
 }
 
-function buildAllSegmentCombinations(maxWordLength: number, maxWordSegment: number) {
+function buildAllSegmentCombinations(
+  maxWordLength: number,
+  maxWordSegment: number
+) {
   const subsets: number[][] = [];
   const nums = [...Array(maxWordLength).keys()].slice(1);
   buildAllSubsets(nums, maxWordLength, 0, [], subsets, maxWordSegment);
@@ -126,8 +134,8 @@ function combineListWithArray(list: string[][], arr2: string[]): string[][] {
   return result;
 }
 
-function main() {
-  // first read in the input file
+async function main() {
+  const words = await processFile(INPUT_FILE_NAME, WORD_SEPERATION);
 
   const processedList = splitListOnMaxLength(words, MAX_WORD_LENGTH);
   const possibleResults = processedList.wordResults;
@@ -138,7 +146,11 @@ function main() {
   );
   const allOptions = buildAllWordOptions(processedList, allSegmentCombinations);
 
-  console.log(allOptions);
+  const results = allOptions.filter((option) =>
+    possibleResults.includes(option.result)
+  );
+
+  await writeToFile(results, OUTPUT_FILE_NAME, WORD_SEPERATION);
 }
 
 main();
