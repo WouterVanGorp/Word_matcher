@@ -4,7 +4,7 @@ import { combineAllArrays } from "./combine.arrays.service";
 // This wil be moved to a config file
 const MAX_WORD_LENGTH = 6;
 const MAX_WORD_SEGMENTS = 2;
-const INPUT_FILE_NAME = "input_test.txt";
+const INPUT_FILE_NAME = "input.txt";
 const OUTPUT_FILE_NAME = "output.txt";
 const WORD_SEPERATION = "\r\n";
 
