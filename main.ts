@@ -1,29 +1,12 @@
-import * as fs from "fs";
 import { ProcessedList, WordOption, WordSegments } from "./types/types";
-
+import { processFile, writeToFile } from "./file.service";
+import { combineAllArrays } from "./combine.arrays.service";
 // This wil be moved to a config file
 const MAX_WORD_LENGTH = 6;
 const MAX_WORD_SEGMENTS = 2;
-const INPUT_FILE_NAME = "input.txt";
+const INPUT_FILE_NAME = "input_test.txt";
 const OUTPUT_FILE_NAME = "output.txt";
-const WORD_SEPERATION = "\r\n"
-
-export const printLine = (wordOption: WordOption): string =>
-  wordOption.components.join("+") + "=" + wordOption.result;
-
-async function processFile(fileName: string, seperation: string): Promise<string[]> {
-  const file = await fs.promises.readFile(fileName, "utf-8");
-  return file.split(seperation);
-}
-async function writeToFile(results: WordOption[], fileName: string, seperation: string) {
-  try {
-     const output = results.map(r => printLine(r)).join(seperation)
-    await fs.promises.writeFile(fileName, output);
-    console.log("The file has been saved!");
-  } catch (err) {
-    console.error(err);
-  }
-}
+const WORD_SEPERATION = "\r\n";
 
 function splitListOnMaxLength(
   wordList: string[],
@@ -52,6 +35,7 @@ function buildAllSegmentCombinations(
   buildAllSubsets(nums, maxWordLength, 0, [], subsets, maxWordSegment);
   return subsets;
 }
+
 function buildAllSubsets(
   nums: number[],
   target: number,
@@ -80,23 +64,23 @@ function buildAllSubsets(
 function buildAllWordOptions(
   wordSegments: WordSegments,
   segmentNumberCombinations: number[][]
-): WordOption[] {
+): string[][] {
   const segmentWordCombinations = buildWordOptionsForAllSegments(
     wordSegments,
     segmentNumberCombinations
   );
-  return buildAllCombinations(segmentWordCombinations);
+  return segmentWordCombinations;
 }
+
 function buildWordOptionsForAllSegments(
   wordSegments: WordSegments,
   segmentCombinations: number[][]
 ): string[][] {
   const options: string[][] = [];
-  segmentCombinations.forEach((segmentCombination) =>
-    options.push(
-      ...buildWordOptionsForSegment(wordSegments, segmentCombination)
-    )
-  );
+  for (let segment of segmentCombinations) {
+    const segmentOptions = buildWordOptionsForSegment(wordSegments, segment);
+    segmentOptions.forEach((option) => options.push(option));
+  }
   return options;
 }
 function buildWordOptionsForSegment(
@@ -108,37 +92,12 @@ function buildWordOptionsForSegment(
   );
   return combineAllArrays(wordCombinations);
 }
-function buildAllCombinations(
-  segmentWordCombinations: string[][]
-): WordOption[] {
-  const result: WordOption[] = [];
-  // do some magic here to create all words
-  return result;
-}
-
-function combineAllArrays(arrays: string[][]): string[][] {
-  let result: string[][] = combineTwoArrays(arrays[0], arrays[1]);
-  for (let i = 2; i < arrays.length; i++) {
-    result = combineListWithArray(result, arrays[i]);
-  }
-  return result;
-}
-function combineTwoArrays(arr1: string[], arr2: string[]): string[][] {
-  var result: string[][] = [];
-  arr1.forEach((word1) => arr2.forEach((word2) => result.push([word1, word2])));
-  return result;
-}
-function combineListWithArray(list: string[][], arr2: string[]): string[][] {
-  var result: string[][] = [];
-  list.forEach((l) => arr2.forEach((word2) => result.push([...l, word2])));
-  return result;
-}
 
 async function main() {
   const words = await processFile(INPUT_FILE_NAME, WORD_SEPERATION);
 
   const processedList = splitListOnMaxLength(words, MAX_WORD_LENGTH);
-  const possibleResults = processedList.wordResults;
+  const allPossibleResults = processedList.wordResults;
 
   const allSegmentCombinations = buildAllSegmentCombinations(
     MAX_WORD_LENGTH,
@@ -146,9 +105,27 @@ async function main() {
   );
   const allOptions = buildAllWordOptions(processedList, allSegmentCombinations);
 
-  const results = allOptions.filter((option) =>
-    possibleResults.includes(option.result)
-  );
+  const results: WordOption[] = [];
+  allOptions.forEach((options) => {
+    const sortedByLenght = options.slice().sort((a, b) => b.length - a.length);
+
+    var filteredResultsWhichContainOptions = sortedByLenght.reduce((acc, val) => {
+      return acc.filter((res) => res.includes(val));
+    }, allPossibleResults);
+
+    // hier moet nog een check gebeuren of de combinatie van de optie het woord vormen of niet
+    filteredResultsWhichContainOptions.forEach((filteredResult) => {
+
+      var isEmpty = sortedByLenght.reduce((acc, val) => {
+        return acc.replace(val, "#");
+      }, filteredResult);
+
+      const t = Array(options.length).fill('#').join('')
+      if (isEmpty === t) {
+        results.push({ result: filteredResult, components: options });
+      }
+    });
+  });
 
   await writeToFile(results, OUTPUT_FILE_NAME, WORD_SEPERATION);
 }
